@@ -316,7 +316,7 @@ def height(tree: Tree) -> int:
 
 def leaves(tree: Tree, node: Optional[Union[int, List[int]]] = None) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64], npt.NDArray[np.float64]]:
     """
-    Return leaf nodes, their indices, and conditional probabilities.
+    Return leaf nodes, their indices, and unconditional probabilities.
     
     Parameters
     ----------
