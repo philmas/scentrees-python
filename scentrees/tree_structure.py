@@ -276,8 +276,8 @@ def stage(tree: Tree, node: Optional[Union[int, List[int], npt.NDArray[np.int64]
     """
     if node is None:
         node = np.arange(len(tree.parent))
-    elif isinstance(node, int):
-        node = np.array([node])
+    elif isinstance(node, (int, np.integer)):
+        node = np.array([int(node)])
     elif isinstance(node, list):
         node = np.array(node)
     
@@ -349,8 +349,8 @@ def leaves(tree: Tree, node: Optional[Union[int, List[int]]] = None) -> Tuple[np
     omegas = np.arange(len(leaf_nodes))
     
     if node is not None:
-        if isinstance(node, int):
-            node = [node]
+        if isinstance(node, (int, np.integer)):
+            node = [int(node)]
         if -1 not in node and len(node) > 0:
             # Filter leaves to only those descending from specified nodes
             omegas_set = set()
