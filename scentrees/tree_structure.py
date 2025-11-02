@@ -434,7 +434,7 @@ def root(tree: Tree, node: Optional[Union[int, List[int]]] = None) -> npt.NDArra
     array([0, 1, 3, 7])
     """
     if node is None:
-        return tree.children[0] if len(tree.children) > 0 else np.array([0])
+        return np.array([0])
     
     # Handle both Python int and numpy integer types
     if isinstance(node, (int, np.integer)):
