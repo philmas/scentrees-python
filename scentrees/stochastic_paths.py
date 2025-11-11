@@ -8,6 +8,7 @@ that can be used with the tree and lattice approximation algorithms.
 import numpy as np
 import numpy.typing as npt
 from typing import Callable
+import warnings
 
 # Global random state for reproducibility (matching Julia's seed)
 _rng = np.random.RandomState(1012019)
@@ -15,7 +16,12 @@ _rng = np.random.RandomState(1012019)
 
 def set_random_seed(seed: int) -> None:
     """
-    Set the random seed for reproducible results.
+    Set the random seed for reproducible results in stochastic_paths module only.
+    
+    .. deprecated:: 0.1.0
+        Use :func:`scentrees.set_seed` instead for package-wide reproducibility.
+        This function only affects the stochastic_paths module and will be removed
+        in a future version.
     
     Parameters
     ----------
@@ -26,7 +32,23 @@ def set_random_seed(seed: int) -> None:
     --------
     >>> set_random_seed(42)
     >>> path = gaussian_path1d()
+    
+    See Also
+    --------
+    scentrees.set_seed : Set seed for all modules (recommended)
+    
+    Notes
+    -----
+    This function is deprecated. Use `scentrees.set_seed()` instead to ensure
+    reproducibility across all modules (tree_structure, kernel_density, and
+    stochastic_paths).
     """
+    warnings.warn(
+        "set_random_seed() is deprecated and only affects stochastic_paths module. "
+        "Use scentrees.set_seed() instead for package-wide reproducibility.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     global _rng
     _rng = np.random.RandomState(seed)
 

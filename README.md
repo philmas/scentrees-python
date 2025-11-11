@@ -84,6 +84,113 @@ tree = Tree.from_branching([1, 2, 2, 2], dimension=1)
 kernel_tree = tree_approximation(tree, generator, 100000, p=2, r=2)
 ```
 
+## Reproducible Results with Seed Management
+
+The package provides comprehensive seed management for deterministic and reproducible results across multiple runs. This is essential for research, debugging, and production deployments where consistency is required.
+
+### Setting the Random Seed
+
+Use `set_seed()` to ensure all random number generation is deterministic:
+
+```python
+import scentrees
+import numpy as np
+
+# Set seed before any operations
+scentrees.set_seed(42)
+
+# All subsequent operations are now deterministic
+tree1 = scentrees.Tree.from_branching([1, 2, 2, 2], dimension=1)
+path1 = scentrees.gaussian_path1d()
+approximated1 = scentrees.tree_approximation(tree1, scentrees.gaussian_path1d, 10000)
+
+# Reset seed to get identical results
+scentrees.set_seed(42)
+tree2 = scentrees.Tree.from_branching([1, 2, 2, 2], dimension=1)
+path2 = scentrees.gaussian_path1d()
+approximated2 = scentrees.tree_approximation(tree2, scentrees.gaussian_path1d, 10000)
+
+# Verify identical results
+assert np.allclose(tree1.state, tree2.state)
+assert np.allclose(path1, path2)
+assert np.allclose(approximated1.state, approximated2.state)
+```
+
+### What `set_seed()` Affects
+
+The `set_seed()` function synchronizes random number generation across all modules:
+
+1. **Tree Structure Initialization** (`Tree.from_branching`): Initial random states and probabilities
+2. **Stochastic Path Generators**: All path generators like `gaussian_path1d()`, `running_maximum1d()`, etc.
+3. **Kernel Density Estimation**: Trajectory generation from data via `kernel_scenarios()` and `create_multidim_generator()`
+4. **Approximation Algorithms**: Random sampling in `tree_approximation()` and `lattice_approximation()`
+
+### Best Practices for Reproducibility
+
+```python
+import scentrees
+
+# Always set seed at the start of your script
+scentrees.set_seed(42)
+
+# For experiments, use different seeds
+for seed in [42, 123, 456, 789]:
+    scentrees.set_seed(seed)
+    tree = scentrees.Tree.from_branching([1, 3, 3, 3], dimension=1)
+    result = scentrees.tree_approximation(tree, scentrees.gaussian_path1d, 100000)
+    # Analyze result...
+
+# For production: use a fixed seed for consistent behavior
+PRODUCTION_SEED = 1012019  # Default seed used in the package
+scentrees.set_seed(PRODUCTION_SEED)
+```
+
+### Complete Reproducible Workflow Example
+
+```python
+import numpy as np
+import scentrees
+
+# Set seed for complete reproducibility
+scentrees.set_seed(12345)
+
+# 1. Generate training data
+training_data = np.array([scentrees.gaussian_path1d()[:, 0] for _ in range(1000)])
+
+# 2. Create kernel density generator
+generator = scentrees.kernel_scenarios(training_data, markovian=False)
+
+# 3. Build and approximate tree
+tree = scentrees.Tree.from_branching([1, 4, 3, 3], dimension=1)
+approximated_tree = scentrees.tree_approximation(tree, generator, 50000)
+
+# 4. This entire workflow will produce identical results with the same seed
+scentrees.set_seed(12345)
+training_data_2 = np.array([scentrees.gaussian_path1d()[:, 0] for _ in range(1000)])
+generator_2 = scentrees.kernel_scenarios(training_data_2, markovian=False)
+tree_2 = scentrees.Tree.from_branching([1, 4, 3, 3], dimension=1)
+approximated_tree_2 = scentrees.tree_approximation(tree_2, generator_2, 50000)
+
+# Verify complete reproducibility
+assert np.allclose(training_data, training_data_2)
+assert np.allclose(approximated_tree.state, approximated_tree_2.state)
+print("✓ Complete workflow is deterministic!")
+```
+
+### Legacy Function Note
+
+⚠️ **Deprecated**: The old `set_random_seed()` function from `stochastic_paths` module is deprecated. It only affects path generators and will be removed in a future version. Use `scentrees.set_seed()` instead for package-wide reproducibility.
+
+```python
+# OLD (deprecated, only affects stochastic_paths module)
+from scentrees import set_random_seed
+set_random_seed(42)  # ⚠️ Only affects path generators!
+
+# NEW (recommended, affects all modules)
+import scentrees
+scentrees.set_seed(42)  # ✓ Affects entire package
+```
+
 ## Core Concepts
 
 ### Scenario Trees vs Scenario Lattices
